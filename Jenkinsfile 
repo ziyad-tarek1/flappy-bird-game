@@ -65,6 +65,20 @@ pipeline {
         stage('Deploy with Helm') {
             steps {
                 script {
+                       def helmCommand = """
+                        helm upgrade --install flappy-bird-release flappy-bird \
+                        --namespace default \
+                        --values flappy-bird/values.yaml
+                        """
+                        // Execute the Helm command
+                        sh(helmCommand)
+                }
+            }
+        }
+
+        /*stage('Deploy with Helm') {
+            steps {
+                script {
                     // Use Helm plugin to deploy the application
                     helm(
                         action: 'upgrade',
@@ -75,6 +89,6 @@ pipeline {
                     )
                 }
             }
-        }
+        }*/
     }
 }
