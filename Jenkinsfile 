@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_CREDENTIALS_ID = 'your-docker-credentials-id'
+        DOCKER_CREDENTIALS_ID = 'DockerHub-Cred'
         DOCKERHUB_REPO = 'ziyadtarek99/flappy-bird-game'
       //IMAGE_TAG = 'latest'
     }
@@ -66,7 +66,7 @@ pipeline {
             steps {
                 script {
                        def helmCommand = """
-                        helm upgrade --install flappy-bird-release flappy-bird \
+                        helm upgrade --install flappy-bird-release flappy-bird-0.1.0.tgz \
                         --namespace default \
                         --values flappy-bird/values.yaml
                         """
