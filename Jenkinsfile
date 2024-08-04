@@ -7,13 +7,7 @@ pipeline {
       //IMAGE_TAG = 'latest'
     }
 
-    stages {
-        stage('Checkout') {
-            steps {
-                // Checkout the code from the repository
-                git 'https://github.com/ziyad-tarek1/flappy-bird-game.git'
-            }
-        }
+
 
         stage('Build Docker Image') {
             steps {
