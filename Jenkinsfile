@@ -4,11 +4,10 @@ pipeline {
     environment {
         DOCKER_CREDENTIALS_ID = 'DockerHub-Cred'
         DOCKERHUB_REPO = 'ziyadtarek99/flappy-bird-game'
-      //IMAGE_TAG = 'latest'
+        // IMAGE_TAG = 'latest' // Removed comment
     }
 
-
-
+    stages {
         stage('Build Docker Image') {
             steps {
                 dir('App') { // Change to the directory containing the Dockerfile
@@ -43,9 +42,7 @@ pipeline {
 
                     // Update the image tag in Kubernetes deployment file
                     sh """
-
                     sed -i "s|image:.*|image: ${DOCKERHUB_REPO}:${IMAGE_TAG}|" k8s/deployment.yaml
-
                     """
 
                     // Update the image tag in Helm values.yaml
@@ -59,30 +56,15 @@ pipeline {
         stage('Deploy with Helm') {
             steps {
                 script {
-                       def helmCommand = """
-                        helm upgrade --install flappy-bird-release flappy-bird-0.1.0.tgz \
-                        --namespace default \
-                        --values flappy-bird/values.yaml
-                        """
-                        // Execute the Helm command
-                        sh(helmCommand)
+                    def helmCommand = """
+                    helm upgrade --install flappy-bird-release flappy-bird-0.1.0.tgz \
+                    --namespace default \
+                    --values flappy-bird/values.yaml
+                    """
+                    // Execute the Helm command
+                    sh(helmCommand)
                 }
             }
         }
-
-        /*stage('Deploy with Helm') {
-            steps {
-                script {
-                    // Use Helm plugin to deploy the application
-                    helm(
-                        action: 'upgrade',
-                        chart: 'flappy-bird',
-                        releaseName: 'flappy-bird-release',
-                        namespace: 'default',
-                        values: 'flappy-bird/values.yaml'
-                    )
-                }
-            }
-        }*/
     }
 }
