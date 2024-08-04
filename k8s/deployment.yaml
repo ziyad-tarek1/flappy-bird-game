@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flappy-bird-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: flappy-bird
+  template:
+    metadata:
+      labels:
+        app: flappy-bird
+    spec:
+      containers:
+      - name: flappy-bird-container
+        image: ziyadtarek99/flappy-bird-game:1.0
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80

@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "flappy-bird.fullname" . }}-test-connection"
+  labels:
+    {{- include "flappy-bird.labels" . | nindent 4 }}
+spec:
+  containers:
+  - name: wget
+    image: busybox
+    command: ['wget']
+    args: ['{{ include "flappy-bird.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never

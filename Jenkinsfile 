@@ -1,0 +1,93 @@
+pipeline {
+    agent {
+        docker {
+            image 'docker:latest'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    environment {
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials'  // Update this with your Docker Hub credentials ID
+        IMAGE_NAME = 'ziad/flappy-bird-game'  // Base name of your Docker image
+        HELM_CHART_PATH = 'flappy-bird'  // Path to your Helm chart
+        K8S_DEPLOYMENT_PATH = 'k8s/deployment.yaml'  // Path to your Kubernetes deployment file
+    }
+    stages {
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Define the new image tag
+                    def tag = getNextTag()
+
+                    // Build the Docker image with the new tag
+                    sh "docker build -t ${IMAGE_NAME}:${tag} App"
+
+                    // Print the tag for reference
+                    echo "Built Docker image with tag: ${tag}"
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            steps {
+                script {
+                    // Define the new image tag
+                    def tag = getNextTag()
+
+                    // Push the Docker image to Docker Hub
+                    withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: 'https://index.docker.io/v1/']) {
+                        sh "docker push ${IMAGE_NAME}:${tag}"
+                    }
+
+                    // Print the tag for reference
+                    echo "Pushed Docker image with tag: ${tag}"
+                }
+            }
+        }
+        stage('Update Helm Chart') {
+            steps {
+                script {
+                    // Define the new image tag
+                    def tag = getNextTag()
+
+                    // Update the image tag in the Helm chart values.yaml
+                    sh "sed -i 's/tag: .*/tag: \"${tag}\"/' ${HELM_CHART_PATH}/values.yaml"
+
+                    // Print the updated tag for reference
+                    echo "Updated Helm chart with tag: ${tag}"
+                }
+            }
+        }
+        stage('Update Kubernetes Deployment') {
+            steps {
+                script {
+                    // Define the new image tag
+                    def tag = getNextTag()
+
+                    // Update the image tag in the Kubernetes deployment file
+                    sh "sed -i 's/image: ${IMAGE_NAME}:.*$/image: ${IMAGE_NAME}:${tag}/' ${K8S_DEPLOYMENT_PATH}"
+
+                    // Print the updated tag for reference
+                    echo "Updated Kubernetes deployment with tag: ${tag}"
+                }
+            }
+        }
+        stage('Apply Kubernetes Deployment') {
+            steps {
+                script {
+                    // Apply the updated Kubernetes deployment
+                    sh "kubectl apply -f ${K8S_DEPLOYMENT_PATH}"
+
+                    // Print a success message
+                    echo "Applied updated Kubernetes deployment"
+                }
+            }
+        }
+    }
+    // Function to get the next image tag
+    def getNextTag() {
+        def tag = sh(script: "docker images | grep '${IMAGE_NAME}' | awk '{print \$2}' | sort -V | tail -1", returnStdout: true).trim()
+        def baseTag = tag.replaceFirst(/^[0-9]+\./, '')
+        def majorVersion = tag.tokenize('.')[0] as Integer
+        def minorVersion = baseTag.tokenize('.')[1] as Integer
+        return "${majorVersion}.${minorVersion + 1}"
+    }
+}
