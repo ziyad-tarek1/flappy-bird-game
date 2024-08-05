@@ -1,3 +1,4 @@
+//head
 pipeline {
     agent any
 
@@ -56,14 +57,27 @@ pipeline {
         stage('Deploy with Helm') {
             steps {
                 script {
-                    def helmCommand = """
-                    helm upgrade --install flappy-bird-release flappy-bird-0.1.0.tgz \
-                    --namespace default \
-                    --values flappy-bird/values.yaml
-                    """
-                    // Execute the Helm command
-                    sh(helmCommand)
+                    withEnv(['KUBECONFIG=/home/ziad/.kube/config']) {
+                        script {
+                            sh 'helm upgrade --install flappy-bird-release flappy-bird-0.1.0.tgz --namespace default --values flappy-bird/values.yaml'
+
+                        }
+
+
+                    }
+                   
                 }
+            }
+        }
+    }
+}
+
+
+stage('Deploy with Helm') {
+    steps {
+        withEnv(['KUBECONFIG=/home/ziad/.kube/config']) {
+            script {
+                
             }
         }
     }
