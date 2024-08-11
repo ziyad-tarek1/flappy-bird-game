@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: flappy-bird-container
-        image: ziyadtarek99/flappy-bird-game:1.0
-        imagePullPolicy: IfNotPresent
+        image: ziyadtarek99/flappy-bird-game:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 80
