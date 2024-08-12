@@ -65,7 +65,12 @@ pipeline {
             steps {
                 withKubeConfig(credentialsId: "${env.K8S_CRED_ID}") {
                     // Install or upgrade the Helm chart
-                    sh 'helm upgrade --install flappy-bird ./flappy-bird'
+                   sh '''
+                  helm upgrade --install flappy-bird ./flappy-bird
+                  NODE_PORT=$(kubectl get --namespace default -o jsonpath="{.spec.ports[0].nodePort}" services flappy-bird-flappy-bird)
+                  NODE_IP=$(kubectl get nodes --namespace default -o jsonpath="{.items[0].status.addresses[0].address}")
+                  echo "Application available at http://$NODE_IP:$NODE_PORT"
+                   '''
                 }
             }
         }
