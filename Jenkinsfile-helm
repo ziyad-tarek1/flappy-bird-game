@@ -61,11 +61,11 @@ pipeline {
             }
         }
 
-        stage('Deploy to Minikube') {
+        stage('Deploy Helm Chart') {
             steps {
                 withKubeConfig(credentialsId: "${env.K8S_CRED_ID}") {
-                    // Apply the ArgoCD application.yaml to start the CD process
-                    sh 'kubectl apply -f application.yaml'
+                    // Install or upgrade the Helm chart
+                    sh 'helm upgrade --install flappy-bird ./flappy-bird'
                 }
             }
         }
